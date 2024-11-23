@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\BorrowingController;
 
 Route::get('/', function () {
     return view('home');
@@ -30,6 +31,8 @@ Route::get('/categories', [CategoryController::class, 'index'])->name('categorie
 
 // Resource route untuk CRUD kategori
 Route::resource('categories', CategoryController::class)->except(['index']);
+
+Route::get('/members/{memberId}/borrowed-books', [BorrowingController::class, 'showBooksBorrowedByMember']);
 
 Route::resource('books', BookController::class);
 Route::post('/books/{book}/borrow', [BookController::class, 'borrowBook'])->name('books.borrow');

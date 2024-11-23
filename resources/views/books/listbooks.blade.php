@@ -2,6 +2,18 @@
 
 @section('content')
 
+<form action="{{ route('books.index') }}" method="GET" class="d-flex gap-2 mb-3">
+    <select name="category" class="form-select">
+        <option value="">Semua Kategori</option>
+        @foreach($categories as $category)
+            <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                {{ $category->name }}
+            </option>
+        @endforeach
+    </select>
+    <button type="submit" class="btn btn-primary">Filter</button>
+</form>
+
 
 <div class="container">
     @if(session('success'))
@@ -84,6 +96,48 @@
             @endforeach
         </tbody>
     </table>
+
+    
+    <table class="table mt-10">
+        <h5>List buku yang di pinjam</h5>
+        <thead class="bg-gray-200">
+            <tr>
+                <th scope="col" class="text-left px-4 py-2">No</th>
+                <th scope="col" class="text-left px-4 py-2">Nama</th>
+                <th scope="col" class="text-left px-4 py-2">Buku Pinjam</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($members as $member)
+            <tr class="border-b hover:bg-gray-50">
+                <td class="px-4 py-2">{{ $loop->iteration }}</td>
+                <td class="px-4 py-2">{{ $member->name }}</td>
+                <td class="px-4 py-2">
+                    @if($member->borrowedBooks && $member->borrowedBooks->isNotEmpty())
+                        <div class="d-flex flex-column gap-1">
+                            @foreach($member->borrowedBooks as $book)
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-info">{{ $book->name }}</span>
+                                    <small class="text-muted">oleh {{ $book->author }}</small>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <span class="text-muted">Tidak ada buku yang dipinjam</span>
+                    @endif
+                </td>
+                <td class="px-4 py-2">
+                    @if($member->borrowedBooks && $member->borrowedBooks->isNotEmpty())
+                        <a href="{{ route('members.books', $member->id) }}" class="btn btn-sm bg-blue-500 text-white hover:bg-blue-600">
+                            Detail Peminjaman
+                        </a>
+                    @endif
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+        
+    </table>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -103,5 +157,21 @@
             }
         });
     }
+    function confirmPinjam(form) {
+    Swal.fire({
+        title: 'Konfirmasi Pinjaman',
+        text: "Anda yakin ingin meminjam buku ini?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Pinjam',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+}
 </script>
 @endsection

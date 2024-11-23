@@ -8,12 +8,26 @@ use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
-    public function index()
-    {
-        $books = Book::with(['categories', 'borrower'])->get();
-        $members = Member::all();
-        return view('books.listbooks', compact('books', 'members'));
+    public function index(Request $request)
+{
+    $query = Book::query()->with('categories');
+
+    if ($request->has('category') && $request->category) {
+        $query->whereHas('categories', function ($q) use ($request) {
+            $q->where('categories.id', $request->category); // Sebutkan tabel secara eksplisit
+        });
     }
+
+    if ($request->has('status') && $request->status) {
+        $query->where('status', $request->status);
+    }
+
+    $books = $query->get();
+    $categories = Category::all();
+    $members = Member::with('borrowedBooks')->get();
+
+    return view('books.listbooks', compact('books', 'categories', 'members'));
+}
 
 
     // Menampilkan form tambah buku
@@ -46,6 +60,7 @@ class BookController extends Controller
             return redirect()->route('books.index')->with('success', 'Buku berhasil ditambahkan.');
     }
 
+
     // Menampilkan form edit buku
     public function edit(Book $book)
     {
@@ -53,6 +68,7 @@ class BookController extends Controller
         $selectedCategories = $book->categories->pluck('id')->toArray();
         return view('books.editbooks', compact('book', 'categories', 'selectedCategories'));
     }
+
 
     // Memperbarui buku
     public function update(Request $request, Book $book)
@@ -78,6 +94,7 @@ class BookController extends Controller
     {
         $request->validate([
             'member_id' => 'required|exists:members,id',
+            
         ]);
 
         $book = Book::findOrFail($bookId);
