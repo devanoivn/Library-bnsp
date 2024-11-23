@@ -80,12 +80,4 @@ class MemberController extends Controller
         return redirect()->back()->with('error', 'Gagal menghapus member');
     }
 }
-
-    public function showMemberBooks($memberId)
-    {
-        $member = Member::findOrFail($memberId); // Mengambil data anggota
-        $books = $member->books; // Relasi dengan buku
-        return view('members.books', compact('member', 'books'));
-    }
-
 }
